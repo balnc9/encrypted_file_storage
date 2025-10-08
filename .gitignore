@@ -1,0 +1,10 @@
+# project cache
+__pycache__/
+
+# hide user data
+data/
+users.json
+metadata.json
+
+
+
