@@ -1,4 +1,7 @@
 import os
+# test scripts from in-person guided lab sections
+# just use as samples for real scripts i suppose
+
 '''
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms,modes
 
