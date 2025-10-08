@@ -1,6 +1,6 @@
 uc3m crypto final project: encrypted file storage system
 
-## Lab Schedule & Milestones
+## Lab Schedule
 
 | **Date**       | **Lab Session**  | **Focus / Goals**                                             |
 | -------------- | ---------------- | ------------------------------------------------------------- |
