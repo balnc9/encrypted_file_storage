@@ -32,7 +32,7 @@ class User:
 
         return User(
             user_id=str(uuid.uuid4()),
-            username=username,
+            username=username.lower(),
             pwd_hash=pwd_hash,
             created_at=now,
             public_key=public_key,
