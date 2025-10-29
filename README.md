@@ -1,3 +1,7 @@
+last thing done on oct 29:
+
+- account model and manager is setup to generate all required account information
+
 uc3m crypto final project: encrypted file storage system
 
 ## Lab Schedule
