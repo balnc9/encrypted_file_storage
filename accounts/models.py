@@ -11,22 +11,22 @@ class User:
     created_at: str   # ISO8601 "YYYY-MM-DDTHH:MM:SSZ"
 
     # encryption stuff
-    public_key: str | None = None
-    enc_private_key: str | None = None
-    enc_private_key_nonce: str | None = None
-    enc_private_key_salt: str | None = None
-    key_wrap_version: str | None = None
+    public_key: str
+    enc_private_key: str
+    enc_private_key_nonce: str
+    enc_private_key_salt: str
+    key_wrap_version: str = "v1"
 
     # constructor
     @staticmethod
     def new(
         username: str,
         pwd_hash: str,
-        public_key: str | None = None,
-        enc_private_key: str | None = None,
-        enc_private_key_nonce: str | None = None,
-        enc_private_key_salt: str | None = None,
-        key_wrap_version: str | None = "AESGCM-v1",
+        public_key: str,
+        enc_private_key: str,
+        enc_private_key_nonce: str,
+        enc_private_key_salt: str,
+        key_wrap_version: str = "v1",
     ) -> "User":
         now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
