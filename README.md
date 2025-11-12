@@ -1,6 +1,6 @@
-last thing done on oct 29:
+last thing done on nov 12:
 
-- account model and manager is setup to generate all required account information
+- full file storage capability but currently stored as plaintext need to do file encryption
 
 uc3m crypto final project: encrypted file storage system
 
