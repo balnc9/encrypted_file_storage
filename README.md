@@ -1,6 +1,7 @@
-last thing done on nov 12:
+what do we have to do
 
 - full file storage capability but currently stored as plaintext need to do file encryption
+- digital signature implementation somehow
 
 uc3m crypto final project: encrypted file storage system
 
