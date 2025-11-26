@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QInputDialog,
+    QLineEdit,
 )
 
 from accounts.manager import AccountManager
@@ -107,8 +108,9 @@ class LoginPage(QWidget):
 
 
 class StoragePage(QWidget):
-    def __init__(self, parent: Optional[QWidget] = None):
+    def __init__(self, accounts: AccountManager, parent: Optional[QWidget] = None):
         super().__init__(parent)
+        self.accounts = accounts
         self._user: Optional[User] = None
         self._build_ui()
 
@@ -164,7 +166,11 @@ class StoragePage(QWidget):
         if not filepath:
             return
         try:
-            entry = upload_file(user.username, filepath)
+            entry = upload_file(
+                user.username,
+                filepath,
+                user_public_key_pem=self.accounts.public_key_pem(user),
+            )
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "Upload failed", str(exc))
             return
@@ -182,8 +188,17 @@ class StoragePage(QWidget):
         filename, ok = QInputDialog.getText(self, "Download file", "Enter filename to download:")
         if not ok or not filename:
             return
+        password, ok = QInputDialog.getText(
+            self,
+            "Password required",
+            "Enter your password to decrypt:",
+            QLineEdit.Password,
+        )
+        if not ok or password is None:
+            return
         try:
-            target = download_file(user.username, filename)
+            priv_key = self.accounts.decrypt_private_key(user, password)
+            target = download_file(user.username, filename, private_key_pem=priv_key)
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "Download failed", str(exc))
             return
@@ -217,7 +232,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stack)
 
         self.login_page = LoginPage(accounts)
-        self.storage_page = StoragePage()
+        self.storage_page = StoragePage(accounts)
 
         self.stack.addWidget(self.login_page)
         self.stack.addWidget(self.storage_page)

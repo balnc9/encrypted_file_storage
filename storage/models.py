@@ -26,6 +26,8 @@ class FileMetadata:
     stored_name: str
     size: int
     created_at: str
+    wrapped_key: Optional[str] = None
+    wrap_algo: Optional[str] = None
     nonce: Optional[str] = None
     tag: Optional[str] = None
 
@@ -36,6 +38,8 @@ class FileMetadata:
         stored_name: str,
         size: int,
         *,
+        wrapped_key: Optional[str] = None,
+        wrap_algo: Optional[str] = None,
         nonce: Optional[str] = None,
         tag: Optional[str] = None,
     ) -> "FileMetadata":
@@ -46,6 +50,9 @@ class FileMetadata:
             stored_name=stored_name,
             size=size,
             created_at=_now_iso(),
+            #crypto stuff
+            wrapped_key=wrapped_key,
+            wrap_algo=wrap_algo,
             nonce=nonce,
             tag=tag,
         )
@@ -55,4 +62,15 @@ class FileMetadata:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "FileMetadata":
-        return cls(**data)
+        return cls(
+            file_id=data["file_id"],
+            owner=data["owner"],
+            filename=data["filename"],
+            stored_name=data["stored_name"],
+            size=data["size"],
+            created_at=data["created_at"],
+            wrapped_key=data.get("wrapped_key"),
+            wrap_algo=data.get("wrap_algo"),
+            nonce=data.get("nonce"),
+            tag=data.get("tag"),
+        )
