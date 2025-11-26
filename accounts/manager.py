@@ -70,3 +70,26 @@ class AccountManager:
         if not self.hasher.verify(user.pwd_hash, password):
             return None
         return user
+
+    def public_key_pem(self, user: User) -> bytes:
+        """Decode a user's stored public key PEM bytes."""
+        return base64.b64decode(user.public_key)
+
+    def decrypt_private_key(self, user: User, password: str) -> bytes:
+        """
+        Decrypt and return the user's RSA private key PEM bytes using their password.
+        Raises on wrong password or tampered data.
+        """
+        salt = base64.b64decode(user.enc_private_key_salt)
+        nonce = base64.b64decode(user.enc_private_key_nonce)
+        enc_priv = base64.b64decode(user.enc_private_key)
+
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=200_000,
+        )
+        aes_key = kdf.derive(password.encode("utf-8"))
+        aesgcm = AESGCM(aes_key)
+        return aesgcm.decrypt(nonce, enc_priv, None)
