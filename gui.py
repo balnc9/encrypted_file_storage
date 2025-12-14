@@ -207,25 +207,39 @@ class StoragePage(QWidget):
         try:
             # Decrypt private key for signing
             priv_key = self.accounts.decrypt_private_key(user, password)
-            # Get certificate for signature verification
-            cert_pem = self.accounts.get_certificate_pem(user)
+            
+            # Get certificate for signature verification (handle legacy users)
+            cert_pem = None
+            has_signature = False
+            if user.certificate:
+                cert_pem = self.accounts.get_certificate_pem(user)
+                has_signature = True
             
             entry = upload_file(
                 user.username,
                 filepath,
                 user_public_key_pem=self.accounts.public_key_pem(user),
-                private_key_pem=priv_key,
+                private_key_pem=priv_key if has_signature else None,
                 certificate_pem=cert_pem,
             )
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "Upload failed", str(exc))
             return
         self._reload_files()
-        QMessageBox.information(
-            self,
-            "Uploaded & Signed",
-            f"File encrypted and digitally signed!\n\n{entry.filename}\nID: {entry.file_id}",
-        )
+        
+        # Show appropriate message based on whether file was signed
+        if has_signature:
+            QMessageBox.information(
+                self,
+                "Uploaded & Signed",
+                f"File encrypted and digitally signed!\n\n{entry.filename}\nID: {entry.file_id}",
+            )
+        else:
+            QMessageBox.information(
+                self,
+                "Uploaded",
+                f"File encrypted (no signature - legacy account).\n\n{entry.filename}\nID: {entry.file_id}\n\nNote: Re-register to enable digital signatures.",
+            )
 
     def _handle_download(self, filename: str) -> None:
         user = self._require_user()
@@ -243,6 +257,13 @@ class StoragePage(QWidget):
         
         try:
             priv_key = self.accounts.decrypt_private_key(user, password)
+            
+            # Check if file has a signature (for appropriate messaging)
+            from storage.file_manager import list_files
+            entries = list_files(user.username)
+            file_entry = next((e for e in entries if e.filename == filename or e.file_id == filename), None)
+            has_signature = file_entry and file_entry.signature
+            
             target = download_file(
                 user.username, 
                 filename, 
@@ -254,7 +275,7 @@ class StoragePage(QWidget):
             QMessageBox.critical(
                 self, 
                 "Security Warning", 
-                f"⚠️ SIGNATURE VERIFICATION FAILED ⚠️\n\n{str(exc)}\n\n"
+                f"SIGNATURE VERIFICATION FAILED!\n\n{str(exc)}\n\n"
                 "The file may have been tampered with!"
             )
             return
@@ -262,11 +283,19 @@ class StoragePage(QWidget):
             QMessageBox.critical(self, "Download failed", str(exc))
             return
         
-        QMessageBox.information(
-            self,
-            "Download Complete ✓",
-            f"File decrypted and signature verified!\n\nSaved to:\n{target}",
-        )
+        # Show appropriate message
+        if has_signature:
+            QMessageBox.information(
+                self,
+                "Download Complete",
+                f"File decrypted and signature verified!\n\nSaved to:\n{target}",
+            )
+        else:
+            QMessageBox.information(
+                self,
+                "Download Complete",
+                f"File decrypted (no signature - legacy file).\n\nSaved to:\n{target}",
+            )
     
     def _clear_file_list(self) -> None:
         """Remove all file widgets from the list."""
