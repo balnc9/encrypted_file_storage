@@ -3,6 +3,7 @@ import base64
 import json
 import os
 import shutil
+import sys
 import tempfile
 from typing import Iterable, Optional, Tuple
 import uuid
@@ -10,6 +11,11 @@ import uuid
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+# Import signature and PKI functionality
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from crypto.signatures import sign_data, verify_signature, signature_to_base64, signature_from_base64
+from crypto.pki import load_certificate, verify_certificate_signature, extract_public_key_from_cert
 
 from .models import FileMetadata
 
@@ -133,7 +139,23 @@ def upload_file(
     *,
     vault_root: Path = VAULT_ROOT,
     user_public_key_pem: Optional[bytes] = None,
+    private_key_pem: Optional[bytes] = None,
+    certificate_pem: Optional[bytes] = None,
 ) -> FileMetadata:
+    """
+    Upload a file to the vault with encryption and digital signature.
+    
+    Args:
+        username: Username of the file owner
+        filepath: Path to the file to upload
+        vault_root: Root directory for vault storage
+        user_public_key_pem: User's public key for encryption
+        private_key_pem: User's private key for signing
+        certificate_pem: User's certificate (for signature verification)
+    
+    Returns:
+        FileMetadata entry for the uploaded file
+    """
     src = Path(filepath).expanduser()
     if not src.is_file():
         raise FileNotFoundError(f"{filepath} is not a file")
@@ -142,10 +164,27 @@ def upload_file(
 
     stored_name = f"{uuid.uuid4().hex}{src.suffix or ''}.bin"
     owner = _canon_username(username)
+    
+    # Read the original file content for signing
+    plaintext = src.read_bytes()
+    
+    # Sign the file if private key is provided
+    signature_b64 = None
+    signature_algo = None
+    signer_cert_b64 = None
+    
+    if private_key_pem:
+        # Sign the original plaintext (before encryption)
+        signature = sign_data(plaintext, private_key_pem)
+        signature_b64 = signature_to_base64(signature)
+        signature_algo = "RSA-PSS-SHA256"
+        
+        # Include the signer's certificate
+        if certificate_pem:
+            signer_cert_b64 = base64.b64encode(certificate_pem).decode("ascii")
 
     if user_public_key_pem:
         # Encrypt file with random key, wrap it, and store ciphertext blob.
-        plaintext = src.read_bytes()
         file_key = os.urandom(32)  # AES-256
         ciphertext, nonce, tag = encrypt_bytes_aes_gcm(plaintext, file_key)
         wrapped_key = wrap_key_rsa_oaep(file_key, user_public_key_pem)
@@ -160,6 +199,9 @@ def upload_file(
             wrap_algo="rsa-oaep-sha256",
             nonce=base64.b64encode(nonce).decode("ascii"),
             tag=base64.b64encode(tag).decode("ascii"),
+            signature=signature_b64,
+            signature_algo=signature_algo,
+            signer_cert=signer_cert_b64,
         )
     else:
         # Legacy plaintext storage.
@@ -169,6 +211,9 @@ def upload_file(
             filename=src.name,
             stored_name=stored_name,
             size=src.stat().st_size,
+            signature=signature_b64,
+            signature_algo=signature_algo,
+            signer_cert=signer_cert_b64,
         )
 
     entries = _load_index(user_dir)
@@ -183,7 +228,25 @@ def download_file(
     *,
     vault_root: Path = VAULT_ROOT,
     private_key_pem: Optional[bytes] = None,
+    verify_signature: bool = True,
 ) -> Path:
+    """
+    Download and decrypt a file from the vault, verifying its digital signature.
+    
+    Args:
+        username: Username of the file owner
+        filename: Name or ID of the file to download
+        dest_dir: Destination directory (defaults to ~/Downloads/username)
+        vault_root: Root directory for vault storage
+        private_key_pem: User's private key for decryption
+        verify_signature: Whether to verify the file's digital signature
+    
+    Returns:
+        Path to the downloaded file
+    
+    Raises:
+        ValueError: If signature verification fails
+    """
     if not filename:
         raise ValueError("filename cannot be empty")
 
@@ -206,6 +269,7 @@ def download_file(
     if not source_path.exists():
         raise FileNotFoundError(f"Stored blob missing: {source_path}")
 
+    # Decrypt the file if encrypted
     if entry.wrapped_key:
         if not private_key_pem:
             raise ValueError("Private key required to decrypt this file")
@@ -222,8 +286,35 @@ def download_file(
             base64.b64decode(entry.tag or ""),
             file_key,
         )
-        target_path.write_bytes(plaintext)
     else:
-        shutil.copy2(source_path, target_path)
+        plaintext = source_path.read_bytes()
 
+    # Verify digital signature if present and requested
+    if verify_signature and entry.signature:
+        if not entry.signer_cert:
+            raise ValueError("File has signature but no certificate for verification")
+        
+        # Load the signer's certificate
+        cert_pem = base64.b64decode(entry.signer_cert)
+        cert = load_certificate(cert_pem)
+        
+        # Extract public key from certificate
+        public_key_pem = extract_public_key_from_cert(cert)
+        
+        # Verify the certificate is self-signed (or verify with CA if available)
+        if not verify_certificate_signature(cert, public_key_pem):
+            raise ValueError("Certificate verification failed - certificate is not valid")
+        
+        # Verify the file signature
+        signature = signature_from_base64(entry.signature)
+        if not verify_signature(plaintext, signature, public_key_pem):
+            raise ValueError(
+                "Digital signature verification FAILED! "
+                "The file may have been tampered with."
+            )
+        
+        print(f"✓ Digital signature verified successfully for {entry.filename}")
+    
+    # Write the plaintext to the target location
+    target_path.write_bytes(plaintext)
     return target_path

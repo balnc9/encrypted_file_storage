@@ -11,6 +11,12 @@ from .hashing import SimpleHasher
 from .models import User
 from .storage import IStorage
 
+# Import PKI functionality
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from crypto.pki import generate_self_signed_certificate
+
 class AccountManager:
     def __init__(self, storage: IStorage, hasher: SimpleHasher):
         self.storage = storage
@@ -51,6 +57,13 @@ class AccountManager:
         aesgcm = AESGCM(aes_key)
         enc_private_key = aesgcm.encrypt(nonce, private_bytes, None)
 
+        # Generate self-signed certificate for the user
+        certificate_pem = generate_self_signed_certificate(
+            private_bytes,
+            common_name=username_c,
+            validity_days=365
+        )
+
         user = User.new(
             username=username_c,
             pwd_hash=pwd_hash,
@@ -58,6 +71,7 @@ class AccountManager:
             enc_private_key=base64.b64encode(enc_private_key).decode("ascii"),
             enc_private_key_nonce=base64.b64encode(nonce).decode("ascii"),
             enc_private_key_salt=base64.b64encode(salt).decode("ascii"),
+            certificate=base64.b64encode(certificate_pem).decode("ascii"),
         )
         self.storage.save_user(user)
         return user
@@ -93,3 +107,17 @@ class AccountManager:
         aes_key = kdf.derive(password.encode("utf-8"))
         aesgcm = AESGCM(aes_key)
         return aesgcm.decrypt(nonce, enc_priv, None)
+    
+    def get_certificate_pem(self, user: User) -> bytes:
+        """
+        Get the user's certificate in PEM format.
+        
+        Args:
+            user: The user object
+        
+        Returns:
+            PEM-encoded certificate bytes
+        """
+        if not user.certificate:
+            raise ValueError("User has no certificate")
+        return base64.b64decode(user.certificate)

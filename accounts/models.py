@@ -16,6 +16,10 @@ class User:
     enc_private_key_nonce: str
     enc_private_key_salt: str
     key_wrap_version: str = "v1"
+    
+    # PKI - digital signatures and certificates
+    certificate: str = ""  # base64-encoded X.509 certificate (PEM)
+    ca_certificate: str = ""  # base64-encoded CA certificate if using PKI
 
     # constructor
     @staticmethod
@@ -27,6 +31,8 @@ class User:
         enc_private_key_nonce: str,
         enc_private_key_salt: str,
         key_wrap_version: str = "v1",
+        certificate: str = "",
+        ca_certificate: str = "",
     ) -> "User":
         now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -40,4 +46,6 @@ class User:
             enc_private_key_nonce=enc_private_key_nonce,
             enc_private_key_salt=enc_private_key_salt,
             key_wrap_version=key_wrap_version,
+            certificate=certificate,
+            ca_certificate=ca_certificate,
         )

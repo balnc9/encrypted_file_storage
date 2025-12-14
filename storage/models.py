@@ -30,6 +30,10 @@ class FileMetadata:
     wrap_algo: Optional[str] = None
     nonce: Optional[str] = None
     tag: Optional[str] = None
+    # Digital signature fields
+    signature: Optional[str] = None  # base64-encoded signature of file content
+    signature_algo: Optional[str] = None  # e.g., "RSA-PSS-SHA256"
+    signer_cert: Optional[str] = None  # base64-encoded signer's certificate
 
     @staticmethod
     def new(
@@ -42,6 +46,9 @@ class FileMetadata:
         wrap_algo: Optional[str] = None,
         nonce: Optional[str] = None,
         tag: Optional[str] = None,
+        signature: Optional[str] = None,
+        signature_algo: Optional[str] = None,
+        signer_cert: Optional[str] = None,
     ) -> "FileMetadata":
         return FileMetadata(
             file_id=str(uuid.uuid4()),
@@ -55,6 +62,10 @@ class FileMetadata:
             wrap_algo=wrap_algo,
             nonce=nonce,
             tag=tag,
+            # digital signature stuff
+            signature=signature,
+            signature_algo=signature_algo,
+            signer_cert=signer_cert,
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,4 +84,7 @@ class FileMetadata:
             wrap_algo=data.get("wrap_algo"),
             nonce=data.get("nonce"),
             tag=data.get("tag"),
+            signature=data.get("signature"),
+            signature_algo=data.get("signature_algo"),
+            signer_cert=data.get("signer_cert"),
         )

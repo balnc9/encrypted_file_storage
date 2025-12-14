@@ -7,12 +7,14 @@ from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QFormLayout,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -123,25 +125,51 @@ class StoragePage(QWidget):
         layout.addWidget(self.welcome)
 
         info = QLabel(
-            "Manage your encrypted files locally. Upload stores a file in your vault; "
-            "Download restores one (by name or ID) into your downloads folder."
+            "Manage your encrypted files. Click 'Upload File' to add a new file, "
+            "or click the download button next to any file to retrieve it."
         )
         info.setWordWrap(True)
         layout.addWidget(info)
 
-        self.files_label = QLabel("No files uploaded yet.")
-        self.files_label.setWordWrap(True)
-        self.files_label.setStyleSheet("font-family: monospace;")
-        layout.addWidget(self.files_label)
-
-        upload_btn = QPushButton("Upload file…")
-        download_btn = QPushButton("Download file…")
-        layout.addWidget(upload_btn)
-        layout.addWidget(download_btn)
-        layout.addStretch()
-
+        upload_btn = QPushButton("Upload File")
+        upload_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+        """)
         upload_btn.clicked.connect(self._handle_upload)
-        download_btn.clicked.connect(self._handle_download)
+        layout.addWidget(upload_btn)
+
+        # Files section header
+        files_header = QLabel("Your Files:")
+        files_header.setStyleSheet("font-size: 14px; font-weight: bold; margin-top: 10px;")
+        layout.addWidget(files_header)
+
+        # Scrollable area for file list
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.StyledPanel)
+        scroll_area.setStyleSheet("QScrollArea { background-color: white; }")
+        
+        self.files_container = QWidget()
+        self.files_layout = QVBoxLayout(self.files_container)
+        self.files_layout.setSpacing(8)
+        
+        self.empty_label = QLabel("No files uploaded yet.")
+        self.empty_label.setStyleSheet("color: #555; padding: 20px; font-size: 13px;")
+        self.files_layout.addWidget(self.empty_label)
+        self.files_layout.addStretch()
+        
+        scroll_area.setWidget(self.files_container)
+        layout.addWidget(scroll_area, 1)  # Give it stretch factor
 
     def set_user(self, user: User) -> None:
         self._user = user
@@ -151,7 +179,7 @@ class StoragePage(QWidget):
     def clear_user(self) -> None:
         self._user = None
         self.welcome.setText("")
-        self.files_label.setText("No user logged in.")
+        self._clear_file_list()
 
     def _require_user(self) -> Optional[User]:
         if not self._user:
@@ -165,11 +193,29 @@ class StoragePage(QWidget):
         filepath, _ = QFileDialog.getOpenFileName(self, "Select file to upload")
         if not filepath:
             return
+        
+        # Request password to decrypt private key for signing
+        password, ok = QInputDialog.getText(
+            self,
+            "Password required",
+            "Enter your password to sign the file:",
+            QLineEdit.Password,
+        )
+        if not ok or password is None:
+            return
+        
         try:
+            # Decrypt private key for signing
+            priv_key = self.accounts.decrypt_private_key(user, password)
+            # Get certificate for signature verification
+            cert_pem = self.accounts.get_certificate_pem(user)
+            
             entry = upload_file(
                 user.username,
                 filepath,
                 user_public_key_pem=self.accounts.public_key_pem(user),
+                private_key_pem=priv_key,
+                certificate_pem=cert_pem,
             )
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "Upload failed", str(exc))
@@ -177,47 +223,136 @@ class StoragePage(QWidget):
         self._reload_files()
         QMessageBox.information(
             self,
-            "Uploaded",
-            f"Stored {entry.filename}\nID: {entry.file_id}",
+            "Uploaded & Signed",
+            f"File encrypted and digitally signed!\n\n{entry.filename}\nID: {entry.file_id}",
         )
 
-    def _handle_download(self) -> None:
+    def _handle_download(self, filename: str) -> None:
         user = self._require_user()
         if not user:
             return
-        filename, ok = QInputDialog.getText(self, "Download file", "Enter filename to download:")
-        if not ok or not filename:
-            return
+        
         password, ok = QInputDialog.getText(
             self,
             "Password required",
-            "Enter your password to decrypt:",
+            f"Enter your password to decrypt '{filename}':",
             QLineEdit.Password,
         )
         if not ok or password is None:
             return
+        
         try:
             priv_key = self.accounts.decrypt_private_key(user, password)
-            target = download_file(user.username, filename, private_key_pem=priv_key)
+            target = download_file(
+                user.username, 
+                filename, 
+                private_key_pem=priv_key,
+                verify_signature=True  # Enable signature verification
+            )
+        except ValueError as exc:
+            # Signature verification failures are ValueError
+            QMessageBox.critical(
+                self, 
+                "Security Warning", 
+                f"⚠️ SIGNATURE VERIFICATION FAILED ⚠️\n\n{str(exc)}\n\n"
+                "The file may have been tampered with!"
+            )
+            return
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "Download failed", str(exc))
             return
+        
         QMessageBox.information(
             self,
-            "Download complete",
-            f"Saved to {target}",
+            "Download Complete ✓",
+            f"File decrypted and signature verified!\n\nSaved to:\n{target}",
         )
+    
+    def _clear_file_list(self) -> None:
+        """Remove all file widgets from the list."""
+        while self.files_layout.count() > 0:
+            item = self.files_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
+        self.empty_label = QLabel("No user logged in.")
+        self.empty_label.setStyleSheet("color: #555; padding: 20px; font-size: 13px;")
+        self.files_layout.addWidget(self.empty_label)
+        self.files_layout.addStretch()
     
     def _reload_files(self) -> None:
         if not self._user:
-            self.files_label.setText("No user logged in.")
+            self._clear_file_list()
             return
+        
         entries = list_files(self._user.username)
+        
+        # Clear existing widgets
+        while self.files_layout.count() > 0:
+            item = self.files_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
         if not entries:
-            self.files_label.setText("No files uploaded yet.")
+            self.empty_label = QLabel("No files uploaded yet. Click 'Upload File' to get started!")
+            self.empty_label.setStyleSheet("color: #555; padding: 20px; font-size: 13px;")
+            self.files_layout.addWidget(self.empty_label)
+            self.files_layout.addStretch()
             return
-        lines = [f"{e.filename}  (id={e.file_id}, {e.size} bytes)" for e in entries]
-        self.files_label.setText("\n".join(lines))
+        
+        # Create a widget for each file
+        for entry in entries:
+            file_widget = QFrame()
+            file_widget.setFrameShape(QFrame.Box)
+            file_widget.setStyleSheet("""
+                QFrame {
+                    background-color: #e8e8e8;
+                    border: 2px solid #bbb;
+                    border-radius: 3px;
+                }
+            """)
+            
+            file_layout = QHBoxLayout(file_widget)
+            file_layout.setContentsMargins(12, 10, 12, 10)
+            
+            # Format file size
+            size_kb = entry.size / 1024
+            if size_kb < 1024:
+                size_str = f"{size_kb:.1f} KB"
+            else:
+                size_str = f"{size_kb / 1024:.1f} MB"
+            
+            # Simple file label
+            file_label = QLabel(f"{entry.filename} ({size_str})")
+            file_label.setStyleSheet("font-size: 14px; color: #000; font-weight: normal; background: transparent; border: none;")
+            
+            file_layout.addWidget(file_label, 1)
+            
+            # Download button
+            download_btn = QPushButton("Download")
+            download_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #2196F3;
+                    color: white;
+                    border: none;
+                    padding: 6px 20px;
+                    font-size: 13px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: #1976D2;
+                }
+                QPushButton:pressed {
+                    background-color: #0D47A1;
+                }
+            """)
+            download_btn.clicked.connect(lambda checked=False, fn=entry.filename: self._handle_download(fn))
+            
+            file_layout.addWidget(download_btn)
+            
+            self.files_layout.addWidget(file_widget)
+        
+        self.files_layout.addStretch()
 
 
 
@@ -225,7 +360,7 @@ class MainWindow(QMainWindow):
     def __init__(self, accounts: AccountManager):
         super().__init__()
         self.setWindowTitle("Encrypted File Storage")
-        self.resize(420, 320)
+        self.resize(600, 500)
 
         self.accounts = accounts
         self.stack = QStackedWidget()

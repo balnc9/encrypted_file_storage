@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "file_id": "71904587-4116-4715-b332-23b63c1f38b2",
+      "owner": "matt",
+      "filename": ".gitignore",
+      "stored_name": "f312c1eed79244199652ba83a3620a89.bin",
+      "size": 91,
+      "created_at": "2025-12-14T18:08:58Z",
+      "wrapped_key": "rRzKe7Ll+xMbjC+7amkvhfKQQj87s57/1vC7f6ulskDlaZyhRQ14kXxqWMYOALs84Fv4f2UgicO1OTsKU1t4YycvTKJPK8NtnHzr/pzzfuqLQDhArAg8cYzqSLw/XX6ow6F1Ai0ia/GIAoUjVop27Ru7LFt3BDdCg2g+8SHlcjllc/fazVTs+QDzqW9rmT+AQHMLN92M4copcBq61h/EcNpZ+9UOA+uG0RtN2EvmdsfUadlGQlgfilHqGhY2ehx44bb6XfRSKsLl41t2MkahAw6dQN0LLVYruERaK9RBQN3ZCsc574PpeqqZkzAXQT1N4qgq3Wt3OWme33EvSiy2bQ==",
+      "wrap_algo": "rsa-oaep-sha256",
+      "nonce": "8ACLgh0ueSsdjvm6",
+      "tag": "csKIqE/PRUtW3Tn/IslRcg=="
+    }
+  ]
+}
