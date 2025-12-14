@@ -1,10 +1,26 @@
-# project cache
+# Python cache
 __pycache__/
+*.pyc
+*.pyo
 
-# hide user data
+# User data (privacy)
 data/
 users.json
 metadata.json
+vault/
 
+# PKI secrets (don't commit private keys!)
+pki/
+*.pem
 
+# PDFs (course materials)
+pdfs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
 
