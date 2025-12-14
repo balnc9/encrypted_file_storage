@@ -16,8 +16,9 @@ from crypto.pki import (
     extract_public_key_from_cert, verify_certificate_signature,
     verify_certificate_chain, get_certificate_info
 )
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
 
 
 def test_digital_signatures():
@@ -278,7 +279,7 @@ def test_certificate_chain_verification():
     ).add_extension(
         x509.BasicConstraints(ca=False, path_length=None),
         critical=True,
-    ).sign(ca_private_key, __import__('cryptography.hazmat.primitives.hashes', fromlist=['SHA256']).SHA256())
+    ).sign(ca_private_key, hashes.SHA256())
     
     print("   [OK] User certificate signed by CA")
     
@@ -289,8 +290,8 @@ def test_certificate_chain_verification():
     print("   [OK] Certificate chain verified successfully")
     
     print(f"\nCertificate Chain:")
-    print(f"  Root CA: {ca_cert.subject.get_attributes_for_oid(__import__('cryptography.x509.oid', fromlist=['NameOID']).NameOID.COMMON_NAME)[0].value}")
-    print(f"  User: {user_cert.subject.get_attributes_for_oid(__import__('cryptography.x509.oid', fromlist=['NameOID']).NameOID.COMMON_NAME)[0].value}")
+    print(f"  Root CA: {ca_cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value}")
+    print(f"  User: {user_cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value}")
     print(f"  Chain is valid: [OK]")
     
     print("\n[PASS] CERTIFICATE CHAIN VERIFICATION TEST PASSED\n")
