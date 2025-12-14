@@ -228,7 +228,7 @@ def download_file(
     *,
     vault_root: Path = VAULT_ROOT,
     private_key_pem: Optional[bytes] = None,
-    verify_signature: bool = True,
+    check_signature: bool = True,
 ) -> Path:
     """
     Download and decrypt a file from the vault, verifying its digital signature.
@@ -239,7 +239,7 @@ def download_file(
         dest_dir: Destination directory (defaults to ~/Downloads/username)
         vault_root: Root directory for vault storage
         private_key_pem: User's private key for decryption
-        verify_signature: Whether to verify the file's digital signature
+        check_signature: Whether to verify the file's digital signature
     
     Returns:
         Path to the downloaded file
@@ -290,7 +290,7 @@ def download_file(
         plaintext = source_path.read_bytes()
 
     # Verify digital signature if present and requested
-    if verify_signature and entry.signature:
+    if check_signature and entry.signature:
         if not entry.signer_cert:
             raise ValueError("File has signature but no certificate for verification")
         

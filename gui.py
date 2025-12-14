@@ -247,7 +247,7 @@ class StoragePage(QWidget):
                 user.username, 
                 filename, 
                 private_key_pem=priv_key,
-                verify_signature=True  # Enable signature verification
+                check_signature=True  # Enable signature verification
             )
         except ValueError as exc:
             # Signature verification failures are ValueError
