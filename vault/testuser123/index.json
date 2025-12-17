@@ -1,0 +1,26 @@
+{
+  "files": [
+    {
+      "file_id": "cf31b3b5-c773-4997-a4a0-e68c285d03a2",
+      "owner": "testuser123",
+      "filename": "test_upload.txt",
+      "stored_name": "65dbac7d6883443ea4f2f8b45115dbe1.txt.bin",
+      "size": 12,
+      "created_at": "2025-12-17T18:10:59Z",
+      "wrapped_key": "DNfZA7A5Zc4dERuD+FMG6zbdvVV6FTv97X1Al6/2AVOZ7YjAevT6sqPovds0adX65TTnIRw87kHEuISWROxJ45D3wvC2gaXH5EFZy2pm/2CMFW8B6u1WfUM71lFGHNbZvKABjCo8TsouoSJKkmvpeMZx7la5KvNa9a06lQrxtusATyS6IIybN0t2EvQ8MzOKthaZPvc1CQwPZQOUwhVVVHu1N9xciC0z5QcEs+JKYRa7WFflBQF2II3qH9RvOgq5+4l3gBYsPos2aLxwz2aLGkYKAnmLNz8xFUtpktdfIahsDq4LjXOcRjGk56h1oLPRcbm1fFQJ5nEk3aY+fADrQQ==",
+      "wrap_algo": "rsa-oaep-sha256",
+      "nonce": "LwDttPNGrRsablE4",
+      "tag": "tDfDiEPTAsOrEOFpq6j+7Q==",
+      "signature": "Uss+3KqXZvs9Dr5QbMLk9HQ50FuYHKFbF6uJS897q6RLIhRSCtMyfF30VADDwVIyrqU0dZADi9IKELNmi86YcDwLYoxoVpHJKb0ithGpytKiF5gFw0ZZFQwPkkWtcpgX2FcmfVB7Miou5ixCs2iJO7rs2fQfe4M5Ztqnx0m2sn3Z1sRxM9KAPBj3yGNRnm0hlqdAXAJNepfVkSrO9sYJThS2xOaizLG/C0tXcRU3n3Vk6lJ74rfENXfGA3d7UpaXd7K8SgzIkiiibfOLElPryRVNmeucZ9WEnZGuHjQ2NHGmqO8JmEnEu3Z5dbDwP8VR11Q6EodSrpfj13fYByF2YA==",
+      "signer": "testuser123",
+      "file_hash": "f4OxZX/x/FO5LcGBSKHWXfwtSx+j1ncoSt3SABJtkGk=",
+      "recipient_keys": [
+        {
+          "username": "testuser123",
+          "wrapped_key": "DNfZA7A5Zc4dERuD+FMG6zbdvVV6FTv97X1Al6/2AVOZ7YjAevT6sqPovds0adX65TTnIRw87kHEuISWROxJ45D3wvC2gaXH5EFZy2pm/2CMFW8B6u1WfUM71lFGHNbZvKABjCo8TsouoSJKkmvpeMZx7la5KvNa9a06lQrxtusATyS6IIybN0t2EvQ8MzOKthaZPvc1CQwPZQOUwhVVVHu1N9xciC0z5QcEs+JKYRa7WFflBQF2II3qH9RvOgq5+4l3gBYsPos2aLxwz2aLGkYKAnmLNz8xFUtpktdfIahsDq4LjXOcRjGk56h1oLPRcbm1fFQJ5nEk3aY+fADrQQ=="
+        }
+      ],
+      "shared_with": []
+    }
+  ]
+}

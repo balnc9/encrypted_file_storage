@@ -1,6 +1,6 @@
 import base64
 import os
-from typing import Optional
+from typing import Optional, List, Dict
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -93,3 +93,28 @@ class AccountManager:
         aes_key = kdf.derive(password.encode("utf-8"))
         aesgcm = AESGCM(aes_key)
         return aesgcm.decrypt(nonce, enc_priv, None)
+
+    def get_all_users(self) -> List[User]:
+        """Get all registered users."""
+        return self.storage.get_all_users()
+
+    def get_other_users(self, exclude_username: str) -> List[User]:
+        """Get all users except the specified one."""
+        exclude_c = self._canon(exclude_username)
+        return [u for u in self.get_all_users() if u.username != exclude_c]
+
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        """Get a user by their username."""
+        return self.storage.get_user_by_username(self._canon(username))
+
+    def get_public_keys_for_users(self, usernames: List[str]) -> Dict[str, bytes]:
+        """
+        Get public keys for multiple users.
+        Returns dict of {username: public_key_pem_bytes}
+        """
+        result = {}
+        for username in usernames:
+            user = self.storage.get_user_by_username(self._canon(username))
+            if user:
+                result[user.username] = self.public_key_pem(user)
+        return result

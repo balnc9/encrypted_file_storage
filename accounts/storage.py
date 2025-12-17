@@ -1,14 +1,25 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
+from dataclasses import fields
 from .models import User
 import json, os, tempfile
+
+# Get valid field names from User dataclass
+_USER_FIELDS = {f.name for f in fields(User)}
+
+def _make_user(data: Dict[str, Any]) -> User:
+    """Create a User from dict, filtering out unknown fields for backwards compatibility."""
+    filtered = {k: v for k, v in data.items() if k in _USER_FIELDS}
+    return User(**filtered)
 
 class IStorage(ABC):
     @abstractmethod
     def get_user_by_username(self, username: str) -> Optional[User]: ...
     @abstractmethod
     def save_user(self, user: User) -> None: ...
+    @abstractmethod
+    def get_all_users(self) -> List[User]: ...
 
 class JSONStorage(IStorage):
     def __init__(self, path: str = "users.json"):
@@ -37,7 +48,7 @@ class JSONStorage(IStorage):
         data = self._load()
         for u in data["users"]:
             if u["username"] == username:
-                return User(**u)
+                return _make_user(u)
         return None
 
     def save_user(self, user: User) -> None:
@@ -46,3 +57,7 @@ class JSONStorage(IStorage):
             raise ValueError("username already exists")
         data["users"].append(user.__dict__)
         self._save(data)
+
+    def get_all_users(self) -> List[User]:
+        data = self._load()
+        return [_make_user(u) for u in data["users"]]

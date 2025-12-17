@@ -1,0 +1,54 @@
+{
+  "files": [
+    {
+      "file_id": "a1570eaf-1810-44b0-a5e4-d20384434eeb",
+      "owner": "p",
+      "filename": "README.md",
+      "stored_name": "8088c531acf442d8877b1963d56cbbf4.md.bin",
+      "size": 5514,
+      "created_at": "2025-12-17T18:14:44Z",
+      "wrapped_key": "cUBPKA7JA/99FpjVUzyG8y/I17Zc7H0lPoO2B2ZWwPML4Jt3AgsNQjptqGYdH4Rb+ARbVcLpfiHeYDOYsZmQTIEnnHJG06/VQGKldVNdDzPwF6AXPb4s3+2sBy2X0WsSal2hnSfMP2S/6DYU3ivMzyJUuACu+vwJl03rJuSA62ZxKRpJEa03ZWu77L/rkPNhB6ZrupJLUzeaedjv3OtppNkVdFNbL6Gh2ggoF1w77uGjnHdPRrOstSv07HBxxebcDHh2U9oS/3nvOGR8k1fdCaPshnILhMVF/BSmnhb2/uka8YYTl9JeZ3od5RGiQ9wGqPIGjDqq86KSTl222bgbkQ==",
+      "wrap_algo": "rsa-oaep-sha256",
+      "nonce": "S2pNGVDJ3gNad+1k",
+      "tag": "Q63kzbmHEW+pMwzeVzrJTQ==",
+      "signature": "PkW2W13L+rLan6DVbT/aLucX9p8YM7BkiGi83z7U0Uv3Tgum131o1T5TuknbErwNHlZtlw/vsVFVtDsNCgduzumGJrJctcENpGoBQ8fbCoWN8QJb5aUfpid/YEOv1Hb2/yu29J/8G2HzHr6bpXXPprkwT67KfF1uSIrfn4H5B9Nl7TwCAwrBD/VPC/OIpFzuLIHG+0Hqf05cPJna2dcfXwEiNjLmjvyo7+tMGHNrUcvQEDGnldRxI6ck0ROCYN8fwOeu95hUU22W2KIzNvVG+Q1HCvsqVyelslj4/DcpspVvN//xZ79zhgnoRlLXBhSWdiGgSeBHl1QaVJd1OhcKIg==",
+      "signer": "p",
+      "file_hash": "CdHpnS00Umgh+5sOSZ9gjllguXF4Xwn54sJWcyavq7U=",
+      "recipient_keys": [
+        {
+          "username": "p",
+          "wrapped_key": "cUBPKA7JA/99FpjVUzyG8y/I17Zc7H0lPoO2B2ZWwPML4Jt3AgsNQjptqGYdH4Rb+ARbVcLpfiHeYDOYsZmQTIEnnHJG06/VQGKldVNdDzPwF6AXPb4s3+2sBy2X0WsSal2hnSfMP2S/6DYU3ivMzyJUuACu+vwJl03rJuSA62ZxKRpJEa03ZWu77L/rkPNhB6ZrupJLUzeaedjv3OtppNkVdFNbL6Gh2ggoF1w77uGjnHdPRrOstSv07HBxxebcDHh2U9oS/3nvOGR8k1fdCaPshnILhMVF/BSmnhb2/uka8YYTl9JeZ3od5RGiQ9wGqPIGjDqq86KSTl222bgbkQ=="
+        },
+        {
+          "username": "o",
+          "wrapped_key": "Db3ek8Fa7Bgn9TUnZ1jeM+O4/M58UF1rTP2yw/uMidWoHtu0SRMy+u8jBLDMYSGCzJYmZV8aU9fFbzhDjk6ihHOpVi0AZ7EYvw2+AMQCbwJmI9E0xFA2ln5lz6XJq/J3yf2nb+MXrjRr4MLrbTTkCnojDYd5DwWFInjh+fQNPtiv9WpRGxxWD98Hv9FLMpJOiupH9efA78oyakbkKZv1ipBjgsQGFxAdy1OYspFKzNmsdxUyO9TIolPqfDP/DFgai+6SZZUk+Ra1p8/JoJCxcQq0N3lLCAoxpuwlWOdT3WV/ijZgML3yMh2pGewzQEZwnOfoHkF5zoUt1dVd+G1JPg=="
+        }
+      ],
+      "shared_with": [
+        "o"
+      ]
+    },
+    {
+      "file_id": "6c7cb792-38ef-400b-90ba-233e4e8e43d8",
+      "owner": "p",
+      "filename": "cli.py",
+      "stored_name": "4e73eeca3fcd487a847625720c0ec422.py.bin",
+      "size": 12260,
+      "created_at": "2025-12-17T18:15:13Z",
+      "wrapped_key": "UNf5KDlxozGTjkgPPloYjERXR+5YA+1jqBV89VRA/3S4mI0dUtsuN4EeB6A7XmDS6mrFwLhq+cAkTdZYfYJhCJANtVbLckJQJqysOS5OPhqUmtsOlGQ5lqxeRpMUy6R0W7c5x2WXZ24loUrW9t6XEWv6uexLyhhhklnZco1fFZyVyifcOHXoks1A8rx2Y2X2kbpFUHRwDdNuEDMt1hxT5QtlgY7mcFvZ5KAebIKfncjl7/AaI5zpJv0EAHm2kfHTJx0aR6tyWClfRE6cvvy/YWvOXDnYTm00Dt1Rqobwe8o4l047nuSZcqPFIBdx8wCvpr8AsdTLxwb75YHXFEZJ8w==",
+      "wrap_algo": "rsa-oaep-sha256",
+      "nonce": "YaeOg86Kgl1Yy462",
+      "tag": "1WRyu9L6uJ9UnnkWhH/KVg==",
+      "signature": "fj6dU7JwEak6wtuVegzvkTiVlF/tau0ys8aSdCXzp3aMcDVqeVfVi13bb2LHgGSKtPZpgkdaYgB5CEQJj6cFOCD/EiHL5tnxmVffvD+s21IqRZjZN3NkAB7iolVf3KOXyOsCVOCF7un8dIrS2UgeAqeoPHbD+7ARByuRnKJKLy42JhJqQS2tRCr3bMkZIIaytCDyYW14r9augqD3mWO/8XsSCspEohqyjRCA8jkg+vZfFE9bRBWKFMfMMKLiDvL2U29y0IVs9gE6EX8H//h5A8GDTL6TucW36tKTKOybWKxTbI2zuvxQjB7PUvL0QBWdRFbEauHHHKvE3Z5PUmIYRw==",
+      "signer": "p",
+      "file_hash": "ZE25eKx6oVRpoAoBCFSK5jlQLGkRyg0FQx30PcEVXC8=",
+      "recipient_keys": [
+        {
+          "username": "p",
+          "wrapped_key": "UNf5KDlxozGTjkgPPloYjERXR+5YA+1jqBV89VRA/3S4mI0dUtsuN4EeB6A7XmDS6mrFwLhq+cAkTdZYfYJhCJANtVbLckJQJqysOS5OPhqUmtsOlGQ5lqxeRpMUy6R0W7c5x2WXZ24loUrW9t6XEWv6uexLyhhhklnZco1fFZyVyifcOHXoks1A8rx2Y2X2kbpFUHRwDdNuEDMt1hxT5QtlgY7mcFvZ5KAebIKfncjl7/AaI5zpJv0EAHm2kfHTJx0aR6tyWClfRE6cvvy/YWvOXDnYTm00Dt1Rqobwe8o4l047nuSZcqPFIBdx8wCvpr8AsdTLxwb75YHXFEZJ8w=="
+        }
+      ],
+      "shared_with": []
+    }
+  ]
+}
