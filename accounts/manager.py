@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from .hashing import SimpleHasher
 from .models import User
 from .storage import IStorage
+from crypto.pki import issue_user_certificate, verify_certificate, load_user_certificate, get_certificate_info
 
 class AccountManager:
     def __init__(self, storage: IStorage, hasher: SimpleHasher):
@@ -51,6 +52,10 @@ class AccountManager:
         aesgcm = AESGCM(aes_key)
         enc_private_key = aesgcm.encrypt(nonce, private_bytes, None)
 
+        # Issue X.509 certificate signed by Root CA
+        cert_pem = issue_user_certificate(username_c, public_pem)
+        cert_b64 = base64.b64encode(cert_pem).decode("ascii")
+
         user = User.new(
             username=username_c,
             pwd_hash=pwd_hash,
@@ -58,6 +63,7 @@ class AccountManager:
             enc_private_key=base64.b64encode(enc_private_key).decode("ascii"),
             enc_private_key_nonce=base64.b64encode(nonce).decode("ascii"),
             enc_private_key_salt=base64.b64encode(salt).decode("ascii"),
+            certificate=cert_b64,
         )
         self.storage.save_user(user)
         return user
@@ -118,3 +124,27 @@ class AccountManager:
             if user:
                 result[user.username] = self.public_key_pem(user)
         return result
+
+    def get_user_certificate(self, user: User) -> Optional[bytes]:
+        """Get a user's X.509 certificate in PEM format."""
+        if user.certificate:
+            return base64.b64decode(user.certificate)
+        # Fallback: try loading from disk
+        return load_user_certificate(user.username)
+
+    def verify_user_certificate(self, user: User) -> dict:
+        """
+        Verify a user's certificate against the Root CA.
+        Returns verification result dict.
+        """
+        cert_pem = self.get_user_certificate(user)
+        if not cert_pem:
+            return {"valid": False, "error": "No certificate found"}
+        return verify_certificate(cert_pem)
+
+    def get_certificate_info(self, user: User) -> Optional[dict]:
+        """Get human-readable certificate information for a user."""
+        cert_pem = self.get_user_certificate(user)
+        if not cert_pem:
+            return None
+        return get_certificate_info(cert_pem)

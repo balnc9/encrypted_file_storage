@@ -148,10 +148,20 @@ class LoginPage(QWidget):
             return
 
         self.password_input.clear()
+        
+        # Get certificate info
+        cert_info = ""
+        if user.certificate:
+            cert_result = self.accounts.verify_user_certificate(user)
+            cert_info = f"\n\nX.509 Certificate issued by:\n  {cert_result.get('issuer', 'Unknown')}"
+        
         QMessageBox.information(
             self,
             "Account created",
-            f"User {user.username} created with RSA key pair.\nYou can log in now.",
+            f"User {user.username} created!\n\n"
+            f"• RSA-2048 key pair generated\n"
+            f"• Private key encrypted with AES-256-GCM\n"
+            f"• Certificate signed by Root CA{cert_info}",
         )
 
 

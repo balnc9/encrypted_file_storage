@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from typing import Optional
 import uuid
 
 @dataclass(frozen=True)
@@ -16,6 +17,9 @@ class User:
     enc_private_key_nonce: str
     enc_private_key_salt: str
     key_wrap_version: str = "v1"
+    
+    # PKI certificate (base64 encoded PEM)
+    certificate: Optional[str] = None
 
     # constructor
     @staticmethod
@@ -27,6 +31,7 @@ class User:
         enc_private_key_nonce: str,
         enc_private_key_salt: str,
         key_wrap_version: str = "v1",
+        certificate: Optional[str] = None,
     ) -> "User":
         now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -40,4 +45,5 @@ class User:
             enc_private_key_nonce=enc_private_key_nonce,
             enc_private_key_salt=enc_private_key_salt,
             key_wrap_version=key_wrap_version,
+            certificate=certificate,
         )
